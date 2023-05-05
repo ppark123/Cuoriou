@@ -16,13 +16,12 @@ cursor.execute('''CREATE TABLE user(
     last_name VARCHAR(20),
     phone_num VARCHAR(15),
     email VARCHAR(30),
-    occupant_num INT
 )''')
 
 # creates the timeslot table 
 # timeslot is broken down into 2 hour frames for a single week 
 # time is in 24 hour system and marks the start time 
-# CONSTRAINT: all rooms have the same open/ close hour from 8-14 from Mon - Fri
+# all rooms have the same open/ close hour from 8-14 from Mon - Fri
 cursor.execute('''CREATE TABLE timeslot(
     availability CHAR(1),
     time INT,
@@ -41,11 +40,12 @@ cursor.execute('''CREATE TABLE location(
 # CONSTRAINT: room number is unique 
 cursor.execute('''CREATE TABLE room(
     room_num CHAR(5) PRIMARY KEY,
+    max_occupancy INT,
     availability CHAR(1),
+    accessbility_supported CHAR(1),
     board_avail CHAR(1),
+    projector_avail CHAR(1),
     building VARCHAR(10),
-    timeslot INT,
-    FOREIGN KEY(timeslot) REFERENCES timeslot(time),
     FOREIGN KEY(building) REFERENCES location(building)
 )''')
 
@@ -55,6 +55,7 @@ cursor.execute('''CREATE TABLE booking(
     user_num INT,
     time_slot INT,
     date DATE,
+    occupant_num INT,
     FOREIGN KEY (user_num) REFERENCES user(user_id) ON DELETE CASCADE,
     FOREIGN KEY (time_slot) REFERENCES timeslot(time) ON DELETE CASCADE,
     FOREIGN KEY (date) REFERENCES timeslot(date) ON DELETE CASCADE
@@ -65,25 +66,32 @@ VALUES ("IK Learning Centre"), ("Library of Arts")
 ''')
 
 cursor.execute('''INSERT INTO timeslot  
-VALUES ('Y', 8, 'Mon', 'I2A'), ('Y', 10, 'Mon','I2A'), ('Y', 12, 'Mon','I2A'), 
-        ('Y', 8, 'Mon', 'I2B'), ('Y', 10, 'Mon','I2B'), ('Y', 12, 'Mon','I2B'),
-         ('Y', 8, 'Mon', 'L1C'), ('Y', 10, 'Mon','L1C'), ('Y', 12, 'Mon','L1C'), 
-        ('Y', 8, 'Mon', 'L1D'), ('Y', 10, 'Mon','L1D'), ('Y', 12, 'Mon','L1D'),
-        ('Y', 8, 'Tue', 'I2A'), ('Y', 10, 'Tue','I2A'), ('Y', 12, 'Tue','I2A'), 
-        ('Y', 8, 'Tue', 'I2B'), ('Y', 10, 'Tue','I2B'), ('Y', 12, 'Tue','I2B'),
-         ('Y', 8, 'Tue', 'L1C'), ('Y', 10, 'Tue','L1C'), ('Y', 12, 'Tue','L1C'), 
-        ('Y', 8, 'Tue', 'L1D'), ('Y', 10, 'Tue','L1D'), ('Y', 12, 'Tue','L1D'),
-        ('Y', 8, 'Wed', 'I2A'), ('Y', 10, 'Wed','I2A'), ('Y', 12, 'Wed','I2A'), 
-        ('Y', 8, 'Wed', 'I2B'), ('Y', 10, 'Wed','I2B'), ('Y', 12, 'Wed','I2B'),
-         ('Y', 8, 'Wed', 'L1C'), ('Y', 10, 'Wed','L1C'), ('Y', 12, 'Wed','L1C'), 
-        ('Y', 8, 'Wed', 'L1D'), ('Y', 10, 'Wed','L1D'), ('Y', 12, 'Wed','L1D'),
-        ('Y', 8, 'Thu', 'I2A'), ('Y', 10, 'Thu','I2A'), ('Y', 12, 'Thu','I2A'), 
-        ('Y', 8, 'Thu', 'I2B'), ('Y', 10, 'Thu','I2B'), ('Y', 12, 'Thu','I2B'),
-         ('Y', 8, 'Thu', 'L1C'), ('Y', 10, 'Thu','L1C'), ('Y', 12, 'Thu','L1C'), 
-        ('Y', 8, 'Thu', 'L1D'), ('Y', 10, 'Thu','L1D'), ('Y', 12, 'Thu','L1D'),
-        ('Y', 8, 'Fri', 'I2A'), ('Y', 10, 'Fri','I2A'), ('Y', 12, 'Fri','I2A'), 
-        ('Y', 8, 'Fri', 'I2B'), ('Y', 10, 'Fri','I2B'), ('Y', 12, 'Fri','I2B'),
-         ('Y', 8, 'Fri', 'L1C'), ('Y', 10, 'Fri','L1C'), ('Y', 12, 'Fri','L1C'), 
-        ('Y', 8, 'Fri', 'L1D'), ('Y', 10, 'Fri','L1D'), ('Y', 12, 'Fri','L1D')
+VALUES ('Y', 8, 'Mon', 'I2A'), ('Y', 10, 'Mon','I2A'), ('Y', 12, 'Mon','I2A'), ('Y', 14, 'Mon','I2A'), 
+        ('Y', 8, 'Mon', 'I2B'), ('Y', 10, 'Mon','I2B'), ('Y', 12, 'Mon','I2B'), ('Y', 14, 'Mon','I2B'),
+        ('Y', 8, 'Mon', 'L1C'), ('Y', 10, 'Mon','L1C'), ('Y', 12, 'Mon','L1C'), ('Y', 14, 'Mon','L1C'), ('Y', 16, 'Mon','L1C'),
+        ('Y', 8, 'Mon', 'L1D'), ('Y', 10, 'Mon','L1D'), ('Y', 12, 'Mon','L1D'), ('Y', 14, 'Mon','L1D'), ('Y', 16, 'Mon','L1D'),
+        ('Y', 8, 'Tue', 'I2A'), ('Y', 10, 'Tue','I2A'), ('Y', 12, 'Tue','I2A'), ('Y', 14, 'Tue','I2A'), 
+        ('Y', 8, 'Tue', 'I2B'), ('Y', 10, 'Tue','I2B'), ('Y', 12, 'Tue','I2B'), ('Y', 14, 'Tue','I2B'), 
+         ('Y', 8, 'Tue', 'L1C'), ('Y', 10, 'Tue','L1C'), ('Y', 12, 'Tue','L1C'), ('Y', 14, 'Tue','L1C'), ('Y', 16, 'Tue','L1C'),
+        ('Y', 8, 'Tue', 'L1D'), ('Y', 10, 'Tue','L1D'), ('Y', 12, 'Tue','L1D'), ('Y', 14, 'Tue','L1D'), ('Y', 16, 'Tue','L1D'),
+        ('Y', 8, 'Wed', 'I2A'), ('Y', 10, 'Wed','I2A'), ('Y', 12, 'Wed','I2A'), ('Y', 12, 'Wed','I2A'), 
+        ('Y', 8, 'Wed', 'I2B'), ('Y', 10, 'Wed','I2B'), ('Y', 12, 'Wed','I2B'), ('Y', 12, 'Wed','I2B'), 
+         ('Y', 8, 'Wed', 'L1C'), ('Y', 10, 'Wed','L1C'), ('Y', 12, 'Wed','L1C'), ('Y', 14, 'Wed','L1C'), ('Y', 16, 'Wed','L1C'),
+        ('Y', 8, 'Wed', 'L1D'), ('Y', 10, 'Wed','L1D'), ('Y', 12, 'Wed','L1D'), ('Y', 14, 'Wed','L1D'), ('Y', 16, 'Wed','L1D'),
+        ('Y', 8, 'Thu', 'I2A'), ('Y', 10, 'Thu','I2A'), ('Y', 12, 'Thu','I2A'), ('Y', 14, 'Thu','I2A'), 
+        ('Y', 8, 'Thu', 'I2B'), ('Y', 10, 'Thu','I2B'), ('Y', 12, 'Thu','I2B'), ('Y', 14, 'Thu','I2A'), 
+         ('Y', 8, 'Thu', 'L1C'), ('Y', 10, 'Thu','L1C'), ('Y', 12, 'Thu','L1C'), ('Y', 14, 'Thu','L1C'), ('Y', 16, 'Thu','L1C'), 
+        ('Y', 8, 'Thu', 'L1D'), ('Y', 10, 'Thu','L1D'), ('Y', 12, 'Thu','L1D'), ('Y', 14, 'Thu','L1D'), ('Y', 16, 'Thu','L1D'),
+        ('Y', 8, 'Fri', 'I2A'), ('Y', 10, 'Fri','I2A'), ('Y', 12, 'Fri','I2A'), ('Y', 14, 'Fri','I2A'),  
+        ('Y', 8, 'Fri', 'I2B'), ('Y', 10, 'Fri','I2B'), ('Y', 12, 'Fri','I2B'), ('Y', 14, 'Fri','I2B'), 
+         ('Y', 8, 'Fri', 'L1C'), ('Y', 10, 'Fri','L1C'), ('Y', 12, 'Fri','L1C'), ('Y', 14, 'Fri','L1C'), ('Y', 16, 'Fri','L1C'),
+        ('Y', 8, 'Fri', 'L1D'), ('Y', 10, 'Fri','L1D'), ('Y', 12, 'Fri','L1D'), ('Y', 14, 'Fri','L1D'), ('Y', 16, 'Fri','L1D')
 ''')
+cursor.execute('''INSERT INTO room  
+VALUES ('I2A', 8, 'Y', 'Y', 'Y', 'N', 'IK Learning Centre'),
+        ('I2B', 8, 'Y', 'Y', 'Y', 'N', 'IK Learning Centre'),
+        ('L1C', 5, 'Y', 'Y', 'Y', 'Y', 'Library of Arts'),
+        ('L1D', 10, 'Y', 'Y', 'Y', 'Y', 'Library of Arts') 
+''')
+
 
